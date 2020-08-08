@@ -16,7 +16,7 @@ exports.createFuncionario = async (req, res) => {
     )
 
     res.status(201).send({
-        message: 'Funcionário cadastrado(a) com sucesso',
+        message: 'Funcionário(a) cadastrado(a) com sucesso',
         body: {
             empresa: {
                 nome_funcionario, 
@@ -53,7 +53,7 @@ exports.updateFuncionarioId = async (req, res) => {
     )
 
     res.status(200).send({
-        message: 'Funcionário atualizado(a) com sucesso'
+        message: 'Funcionário(a) atualizado(a) com sucesso'
     })
 }
 
@@ -63,6 +63,6 @@ exports.deleteFuncionarioId = async (req, res) => {
     await db.query('DELETE FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])
 
     res.status(200).send({
-        messagem: 'Funcionário deletado(a) com sucesso', seqFuncionario
+        messagem: 'Funcionário(a) deletado(a) com sucesso', seqFuncionario
     })
 }

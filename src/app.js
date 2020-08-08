@@ -12,6 +12,7 @@ const app = express()
 const index = require('./routes/index')
 const empresaRoute = require('./routes/empresa.routes')
 const funcionarioRoute = require('./routes/funcionario.routes')
+const associarFuncionarioEmpresaRoute = require('./routes/associarFuncionarioEmpresa.routes')
 
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
@@ -21,5 +22,6 @@ app.use(cors())
 app.use(index)
 app.use('/api/', empresaRoute)
 app.use('/api/', funcionarioRoute)
+app.use('/api/', associarFuncionarioEmpresaRoute)
 
 module.exports = app
