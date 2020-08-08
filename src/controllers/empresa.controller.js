@@ -28,17 +28,86 @@ exports.createEmpresa = async (req, res) => {
 }
 
 exports.listarEmpresas = async (req, res) => {
-    const response = await db.query('SELECT * FROM EMPRESA ORDER BY SEQ_EMPRESA')
+    retorno = {}
 
-    res.status(200).send(response.rows)
+    const responseEmpresas = await db.query('SELECT * FROM EMPRESA ORDER BY SEQ_EMPRESA')
+
+    responseEmpresas.rows.forEach(async emp => {
+        const responseFuncionarios = await db.query('SELECT ' +
+                                                    '    FUNC.SEQ_FUNCIONARIO, ' +
+                                                    '    FUNC.NOME_FUNCIONARIO, ' +
+                                                    '    FUNC.COD_CPF, ' +
+                                                    '    FUNC.DSC_ENDERECO ' +
+                                                    'FROM ' +
+                                                    '    ASSOC_FUNCIONARIO_EMPRESA ASSOC ' +
+                                                    '    INNER JOIN FUNCIONARIO FUNC ON FUNC.SEQ_FUNCIONARIO = ASSOC.SEQ_FUNCIONARIO ' +
+                                                    'WHERE ' +
+                                                    '    ASSOC.SEQ_EMPRESA = $1 ', [emp.seq_empresa])
+
+        let lstFuncionarios = []
+
+        retorno.seq_empresa = emp.seq_empresa
+        retorno.nome_empresa = emp.nome_empresa
+        retorno.cod_cnpj = emp.cod_cnpj
+        retorno.dsc_endereco = emp.dsc_endereco
+
+        responseFuncionarios.rows.forEach(func => {
+            funcionario = {}
+            funcionario.seq_funcionario = func.seq_funcionario
+            funcionario.nome_funcionario = func.nome_funcionario
+            funcionario.cod_cpf = func.cod_cpf
+            funcionario.dsc_endereco = func.dsc_endereco
+        
+            lstFuncionarios.push(funcionario)
+        })
+
+        retorno.funcionarios = lstFuncionarios
+        console.log(retorno)
+    })
+
+    res.status(200).send(responseEmpresas.rows)
 }
 
 exports.pesquisarEmpresaId = async (req, res) => {
     const seqEmpresa = parseInt(req.params.id)
+    retorno = {}
 
-    const response = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
+    const responseEmpresa = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
 
-    res.status(200).send(response.rows)
+    responseEmpresa.rows.forEach(async emp => {
+        const responseFuncionarios = await db.query('SELECT ' +
+                                                    '    FUNC.SEQ_FUNCIONARIO, ' +
+                                                    '    FUNC.NOME_FUNCIONARIO, ' +
+                                                    '    FUNC.COD_CPF, ' +
+                                                    '    FUNC.DSC_ENDERECO ' +
+                                                    'FROM ' +
+                                                    '    ASSOC_FUNCIONARIO_EMPRESA ASSOC ' +
+                                                    '    INNER JOIN FUNCIONARIO FUNC ON FUNC.SEQ_FUNCIONARIO = ASSOC.SEQ_FUNCIONARIO ' +
+                                                    'WHERE ' +
+                                                    '    ASSOC.SEQ_EMPRESA = $1 ', [emp.seq_empresa])
+
+        let lstFuncionarios = []
+
+        retorno.seq_empresa = emp.seq_empresa
+        retorno.nome_empresa = emp.nome_empresa
+        retorno.cod_cnpj = emp.cod_cnpj
+        retorno.dsc_endereco = emp.dsc_endereco
+
+        responseFuncionarios.rows.forEach(func => {
+            funcionario = {}
+            funcionario.seq_funcionario = func.seq_funcionario
+            funcionario.nome_funcionario = func.nome_funcionario
+            funcionario.cod_cpf = func.cod_cpf
+            funcionario.dsc_endereco = func.dsc_endereco
+        
+            lstFuncionarios.push(funcionario)
+        })
+
+        retorno.funcionarios = lstFuncionarios
+        console.log(retorno)
+    })
+
+    res.status(200).send(responseEmpresa.rows)
 }
 
 exports.updateEmpresaId = async (req, res) => {
