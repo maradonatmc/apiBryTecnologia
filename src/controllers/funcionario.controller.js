@@ -37,9 +37,47 @@ exports.listarFuncionarios = async (req, res) => {
 exports.pesquisarFuncionarioId = async (req, res) => {
     const seqFuncionario = parseInt(req.params.id)
 
-    const response = await db.query('SELECT * FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])
+    let retorno = {}
 
-    res.status(200).send(response.rows)
+    const responseFuncionario = await db.query('SELECT * FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])
+
+    responseFuncionario.rows.forEach(async func => {
+        const responseEmpresas = await db.query('SELECT ' +
+                                                '    EMP.SEQ_EMPRESA, ' +
+                                                '    EMP.NOME_EMPRESA, ' +
+                                                '    EMP.COD_CNPJ, ' +
+                                                '    EMP.DSC_ENDERECO ' +
+                                                'FROM ' +
+                                                '    ASSOC_FUNCIONARIO_EMPRESA ASSOC ' +
+                                                '    INNER JOIN EMPRESA EMP ON EMP.SEQ_EMPRESA = ASSOC.SEQ_EMPRESA ' +
+                                                'WHERE ' +
+                                                '    ASSOC.SEQ_FUNCIONARIO = $1 ', [func.seq_funcionario])
+
+        let lstEmpresas = []
+
+        responseEmpresas.rows.forEach(emp => {
+            let empresa = {}
+            empresa.seq_empresa = emp.seq_empresa
+            empresa.nome_empresa = emp.nome_empresa
+            empresa.cod_cnpj = emp.cod_cnpj
+            empresa.dsc_endereco = emp.dsc_endereco
+
+            lstEmpresas.push(empresa)
+        })
+
+        retorno = {
+            seq_funcionario: func.seq_funcionario,
+            nome_funcionario: func.nome_funcionario,
+            cod_cpf: func.cod_cpf,
+            dsc_email: func.dsc_email,
+            dsc_endereco: func.dsc_endereco,
+            empresas: lstEmpresas
+        }
+        
+        res.status(200).send(retorno)
+    });
+
+    //res.status(200).send(response.rows)
 }
 
 exports.updateFuncionarioId = async (req, res) => {
