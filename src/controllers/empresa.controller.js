@@ -7,33 +7,30 @@
 
 const db = require('../config/database')
 const { restart } = require('nodemon')
+const exepctions = require('../exception/exceptions')
 
 exports.createEmpresa = async (req, res) => {
     try {
-        if (req.body == null) {
-            res.status(400).send({
-                message: 'Campos obrigatórios não informados'
-            })
+        if (Object.keys(req.body).length == 0) {
+            exepctions.invalidError(res, `Nenhum campo foi informado`)
+            return
         }
 
         const {nome_empresa, cod_cnpj, dsc_endereco} = req.body
 
         if (nome_empresa == null) {
-            res.status(404).send({
-                message: 'Campo "nome_empresa" não informado'
-            })
+            exepctions.invalidError(res, `Campo 'nome_empresa' não informado`)
+            return
         }
 
         if (cod_cnpj == null) {
-            res.status(404).send({
-                message: 'Campo "cod_cnpj" não informado'
-            })
+            exepctions.invalidError(res, `Campo 'cod_cnpj' não informado`)
+            return
         }
 
         if (dsc_endereco == null) {
-            res.status(404).send({
-                message: 'Campo "dsc_endereco" não informado'
-            })
+            exepctions.invalidError(res, `Campo 'dsc_endereco' não informado`)
+            return
         }
 
         const {rows} = await db.query(
@@ -63,10 +60,9 @@ exports.listarEmpresas = async (req, res) => {
     try {
         const responseEmpresas = await db.query('SELECT * FROM EMPRESA ORDER BY SEQ_EMPRESA')
 
-        if (responseEmpresas.rowCount < 1) {
-            res.status(404).send({
-                message: 'Nenhuma empresa encontrada'
-            })
+        if (responseEmpresas.rowCount == 0) {
+            exepctions.findError(res, `Nenhuma Empresa encontrada`)
+            return
         }
 
         res.status(200).send(responseEmpresas.rows)
@@ -80,23 +76,20 @@ exports.listarEmpresas = async (req, res) => {
 
 exports.pesquisarEmpresaId = async (req, res) => {   
     try {
-        const seqEmpresa = parseInt(req.params.id)
+        if (Object.keys(req.params).length == 0) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' não informado`)
+            return
+        }
 
-        console.log(seqEmpresa)
-        if (seqEmpresa == null) {
-            res.status(400).send({
-                message: 'Parâmetro "seq_empresa" não informado'
-            })
-        }        
+        const seqEmpresa = parseInt(req.params.id)     
 
         let retorno = {}
 
         const responseEmpresa = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
 
         if (responseEmpresa.rowCount == 0) {
-            res.status(404).send({
-                message: `Empresa "${parseInt(req.params.id)}" não encontrada`
-            })            
+            exepctions.findError(res, `Empresa '${seqEmpresa}' não encontrada`)
+            return       
         }
     
         responseEmpresa.rows.forEach(async emp => {
@@ -145,36 +138,36 @@ exports.pesquisarEmpresaId = async (req, res) => {
 
 exports.updateEmpresaId = async (req, res) => {
     try {
-        const seqEmpresa = parseInt(req.params.id)
-
-        if (seqEmpresa == null) {
-            res.status(400).send({
-                message: 'Parâmetro "seq_empresa" não informado'
-            })
+        if (Object.keys(req.params).length == 0) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' não informado`)
+            return
         }        
+
+        const seqEmpresa = parseInt(req.params.id)        
 
         const responseEmpresa = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
 
         if (responseEmpresa.rowCount == 0) {
-            res.status(404).send({
-                message: `Empresa "${parseInt(req.params.id)}" não encontrada`
-            })            
+            exepctions.findError(res, `Empresa '${seqEmpresa}' não encontrada`)
+            return       
         }
 
-        if (req.body == null) {
-            res.status(400).send({
-                message: 'Nenhum campo foi informado'
-            })
+        let nomeEmpresa = responseFuncionario.rows[0].nome_empresa
+
+        if (Object.keys(req.body).length == 0) {
+            exepctions.invalidError(res, `Nenhum campo foi informado`)
+            return
         }
 
         const {nome_empresa, cod_cnpj, dsc_endereco} = req.body
 
         let updNomeEmpresa = `NOME_EMPRESA = '${nome_empresa}'`
+        let updNomeEmpresaAtual = `NOME_EMPRESA = '${nomeEmpresa}'`
         let updCodCnpj = `COD_CNPJ = '${cod_cnpj}'`
         let updDscEndereco = `DSC_ENDERECO = '${dsc_endereco}'`
         let updSeqEmpresa = `SEQ_EMPRESA = ${seqEmpresa}`
 
-        let updDadosEmpresa = `UPDATE EMPRESA SET ${nome_empresa ? `${updNomeEmpresa} ` : ``}
+        let updDadosEmpresa = `UPDATE EMPRESA SET ${nome_empresa ? `${updNomeEmpresa} ` : `${updNomeEmpresaAtual}`}
         ${cod_cnpj ? `, ${updCodCnpj}` : ``}
         ${dsc_endereco ? `, ${updDscEndereco}` : ``}
         WHERE ${updSeqEmpresa}`
@@ -195,13 +188,12 @@ exports.updateEmpresaId = async (req, res) => {
 
 exports.deleteEmpresaId = async (req, res) => {
     try {
-        const seqEmpresa = parseInt(req.params.id)
-
-        if (seqEmpresa == null) {
-            res.status(400).send({
-                message: 'Parâmetro "seq_empresa" não informado'
-            })
+        if (Object.keys(req.params).length == 0) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' não informado`)
+            return
         }        
+
+        const seqEmpresa = parseInt(req.params.id)      
 
         await db.query('DELETE FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
     

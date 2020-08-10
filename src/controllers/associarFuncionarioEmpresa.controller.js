@@ -7,10 +7,40 @@
 
 const db = require('../config/database')
 const { restart } = require('nodemon')
+const exepctions = require('../exception/exceptions')
 
 exports.associarFuncionarioEmpresa = async (req, res) => {
     try {
+        if (Object.keys(req.body).length == 0) {
+            exepctions.invalidError(res, `Nenhum campo foi informado`)
+            return
+        }
+
         const {seq_funcionario, seq_empresa} = req.body
+
+        if (seq_funcionario == null) {
+            exepctions.invalidError(res, `Campo 'seq_funcionario' não informado`)
+            return
+        }
+
+        if (seq_empresa == null) {
+            exepctions.invalidError(res, `Campo 'seq_empresa' não informado`)
+            return
+        }        
+
+        const responseEmpresa = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [parseInt(seq_empresa)])
+        const responseFuncionario = await db.query('SELECT * FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [parseInt(seq_funcionario)])
+
+        if (responseEmpresa.rowCount == 0) {
+            exepctions.findError(res, `Empresa '${parseInt(seq_empresa)}' não encontrada`)
+            return
+        }
+
+        if (responseFuncionario.rowCount == 0) {
+            exepctions.findError(res, `Funcionário(a) '${parseInt(seq_funcionario)}' não encontrado(a)`)
+            return
+        }        
+
         const {rows} = await db.query(
             "INSERT INTO ASSOC_FUNCIONARIO_EMPRESA (SEQ_FUNCIONARIO, SEQ_EMPRESA) VALUES ($1, $2)",
             [seq_funcionario, seq_empresa]
@@ -26,17 +56,45 @@ exports.associarFuncionarioEmpresa = async (req, res) => {
             }
         }) 
     } catch(error) {
-        res.send({
+        res.status(400).send({
             error: 'Error',
             message: error.message
         })
-    }   
+    } 
 }
 
 exports.desassociarFuncionarioEmpresa = async (req, res) => {
     try {
+        if (Object.keys(req.params).length == 0) {
+            exepctions.invalidError(res, `Nenhum parâmetro foi informado`)
+            return
+        }
+
         const seqFuncionario = parseInt(req.params.idFunc)
         const seqEmpresa = parseInt(req.params.idEmp)
+
+        if (seqFuncionario == null) {
+            exepctions.invalidError(res, `Parâmetro 'seq_funcionario' não informado`)
+            return            
+        }
+
+        if (seqEmpresa == null) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' não informado`)
+            return            
+        }
+
+        const responseEmpresa = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
+        const responseFuncionario = await db.query('SELECT * FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])
+
+        if (responseEmpresa.rowCount == 0) {
+            exepctions.findError(res, `Empresa '${seqEmpresa}' não encontrada`)
+            return
+        }
+
+        if (responseFuncionario.rowCount == 0) {
+            exepctions.findError(res, `Funcionário(a) '${seqFuncionario}' não encontrado(a)`)
+            return
+        }        
     
         await db.query('DELETE FROM ASSOC_FUNCIONARIO_EMPRESA WHERE SEQ_FUNCIONARIO = $1 AND SEQ_EMPRESA = $2', [seqFuncionario, seqEmpresa])
     
