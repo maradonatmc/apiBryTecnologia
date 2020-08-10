@@ -9,6 +9,14 @@ const db = require('../config/database')
 const { restart } = require('nodemon')
 
 exports.createFuncionario = async (req, res) => {
+    try {
+
+    } catch(error) {
+        res.send({
+            error: 'Error',
+            message: error.message
+        })
+    }    
     const {nome_funcionario, cod_cpf, dsc_email, dsc_endereco} = req.body
     const {rows} = await db.query(
         "INSERT INTO FUNCIONARIO (NOME_FUNCIONARIO, COD_CPF, DSC_EMAIL, DSC_ENDERECO) VALUES ($1, $2, $3, $4)",
@@ -29,12 +37,28 @@ exports.createFuncionario = async (req, res) => {
 }
 
 exports.listarFuncionarios = async (req, res) => {
+    try {
+
+    } catch(error) {
+        res.send({
+            error: 'Error',
+            message: error.message
+        })
+    }    
     const response = await db.query('SELECT * FROM FUNCIONARIO ORDER BY SEQ_FUNCIONARIO')
 
     res.status(200).send(response.rows)
 }
 
 exports.pesquisarFuncionarioId = async (req, res) => {
+    try {
+
+    } catch(error) {
+        res.send({
+            error: 'Error',
+            message: error.message
+        })
+    }    
     const seqFuncionario = parseInt(req.params.id)
 
     let retorno = {}
@@ -76,11 +100,17 @@ exports.pesquisarFuncionarioId = async (req, res) => {
         
         res.status(200).send(retorno)
     });
-
-    //res.status(200).send(response.rows)
 }
 
 exports.updateFuncionarioId = async (req, res) => {
+    try {
+
+    } catch(error) {
+        res.send({
+            error: 'Error',
+            message: error.message
+        })
+    }    
     const seqFuncionario = parseInt(req.params.id)
 
     const {nome_funcionario, cod_cpf, dsc_email, dsc_endereco} = req.body
@@ -96,6 +126,14 @@ exports.updateFuncionarioId = async (req, res) => {
 }
 
 exports.deleteFuncionarioId = async (req, res) => {
+    try {
+
+    } catch(error) {
+        res.send({
+            error: 'Error',
+            message: error.message
+        })
+    }    
     const seqFuncionario = parseInt(req.params.id)
 
     await db.query('DELETE FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])
