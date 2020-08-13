@@ -18,6 +18,16 @@ exports.associarFuncionarioEmpresa = async (req, res) => {
 
         const {seq_funcionario, seq_empresa} = req.body
 
+        if (isNaN(seq_empresa)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' no formato inválido: Informar valor inteiro`)
+            return
+        }
+
+        if (isNaN(seq_funcionario)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_funcionario' no formato inválido: Informar valor inteiro`)
+            return
+        }                
+
         if (seq_funcionario == null) {
             exepctions.invalidError(res, `Campo 'seq_funcionario' não informado`)
             return
@@ -70,18 +80,18 @@ exports.desassociarFuncionarioEmpresa = async (req, res) => {
             return
         }
 
+        if (isNaN(req.params.idEmp)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' no formato inválido: Informar valor inteiro`)
+            return
+        }
+
+        if (isNaN(req.params.idFunc)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_funcionario' no formato inválido: Informar valor inteiro`)
+            return
+        }        
+
         const seqFuncionario = parseInt(req.params.idFunc)
         const seqEmpresa = parseInt(req.params.idEmp)
-
-        if (seqFuncionario == null) {
-            exepctions.invalidError(res, `Parâmetro 'seq_funcionario' não informado`)
-            return            
-        }
-
-        if (seqEmpresa == null) {
-            exepctions.invalidError(res, `Parâmetro 'seq_empresa' não informado`)
-            return            
-        }
 
         const responseEmpresa = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
         const responseFuncionario = await db.query('SELECT * FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])

@@ -87,6 +87,11 @@ exports.pesquisarFuncionarioId = async (req, res) => {
             return
         }
 
+        if (isNaN(req.params.id)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_funcionario' no formato inválido: Informar valor inteiro`)
+            return
+        }
+
         const seqFuncionario = parseInt(req.params.id)        
 
         let retorno = {}
@@ -148,6 +153,11 @@ exports.updateFuncionarioId = async (req, res) => {
             return
         }        
 
+        if (isNaN(req.params.id)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_funcionario' no formato inválido: Informar valor inteiro`)
+            return
+        }
+
         const seqFuncionario = parseInt(req.params.id)  
 
         const responseFuncionario = await db.query('SELECT * FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])   
@@ -201,7 +211,21 @@ exports.deleteFuncionarioId = async (req, res) => {
             return
         }        
 
+        if (isNaN(req.params.id)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_funcionario' no formato inválido: Informar valor inteiro`)
+            return
+        }        
+
         const seqFuncionario = parseInt(req.params.id)
+
+        const empresasAssociadas = await db.query('SELECT * FROM ASSOC_FUNCIONARIO_EMPRESA WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])
+
+        if (empresasAssociadas.rowCount > 0) {
+            empresasAssociadas.rows.forEach(async assoc => {
+                await db.query('DELETE FROM ASSOC_FUNCIONARIO_EMPRESA WHERE SEQ_FUNCIONARIO = $1 AND SEQ_EMPRESA = $2', 
+                [seqFuncionario, assoc.seq_empresa])
+            })
+        }        
         
         await db.query('DELETE FROM FUNCIONARIO WHERE SEQ_FUNCIONARIO = $1', [seqFuncionario])
 

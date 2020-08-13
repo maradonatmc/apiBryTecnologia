@@ -81,6 +81,11 @@ exports.pesquisarEmpresaId = async (req, res) => {
             return
         }
 
+        if (isNaN(req.params.id)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' no formato inválido: Informar valor inteiro`)
+            return
+        }
+
         const seqEmpresa = parseInt(req.params.id)     
 
         let retorno = {}
@@ -143,6 +148,11 @@ exports.updateEmpresaId = async (req, res) => {
             return
         }        
 
+        if (isNaN(req.params.id)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' no formato inválido: Informar valor inteiro`)
+            return
+        }        
+
         const seqEmpresa = parseInt(req.params.id)        
 
         const responseEmpresa = await db.query('SELECT * FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
@@ -152,7 +162,7 @@ exports.updateEmpresaId = async (req, res) => {
             return       
         }
 
-        let nomeEmpresa = responseFuncionario.rows[0].nome_empresa
+        let nomeEmpresa = responseEmpresa.rows[0].nome_empresa
 
         if (Object.keys(req.body).length == 0) {
             exepctions.invalidError(res, `Nenhum campo foi informado`)
@@ -193,7 +203,21 @@ exports.deleteEmpresaId = async (req, res) => {
             return
         }        
 
-        const seqEmpresa = parseInt(req.params.id)      
+        if (isNaN(req.params.id)) {
+            exepctions.invalidError(res, `Parâmetro 'seq_empresa' no formato inválido: Informar valor inteiro`)
+            return
+        }
+
+        const seqEmpresa = parseInt(req.params.id)
+
+        const funcionariosAssociados = await db.query('SELECT * FROM ASSOC_FUNCIONARIO_EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
+
+        if (funcionariosAssociados.rowCount > 0) {
+            funcionariosAssociados.rows.forEach(async assoc => {
+                await db.query('DELETE FROM ASSOC_FUNCIONARIO_EMPRESA WHERE SEQ_FUNCIONARIO = $1 AND SEQ_EMPRESA = $2', 
+                [assoc.seq_funcionario, seqEmpresa])
+            })
+        }
 
         await db.query('DELETE FROM EMPRESA WHERE SEQ_EMPRESA = $1', [seqEmpresa])
     
