@@ -1,7 +1,3 @@
-# apiBryTecnologia
-
-Desafio de programação Back-end (Pleno)
-
 # Criação do banco de dados e estrutura das tabelas:
 CREATE DATABASE bry
     WITH 
